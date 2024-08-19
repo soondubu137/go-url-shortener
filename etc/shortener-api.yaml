@@ -1,0 +1,17 @@
+Name: shortener-api
+Host: 0.0.0.0
+Port: 8888
+
+URLMapDB:
+  Host: localhost
+  Port: 33060
+  User: admin
+  Password: admin
+  DB: url_shortener
+
+SequenceDB:
+  Host: localhost
+  Port: 33060
+  User: admin
+  Password: admin
+  DB: url_shortener

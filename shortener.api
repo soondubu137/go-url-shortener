@@ -1,0 +1,24 @@
+type ShortenRequest {
+	OriginalURL string `json:"original_url"`
+}
+
+type ShortenResponse {
+	ShortURL string `json:"short_url"`
+}
+
+type RestoreRequest {
+	ShortURL string `json:"short_url"`
+}
+
+type RestoreResponse {
+	OriginalURL string `json:"original_url"`
+}
+
+service shortener-api {
+	@handler ShortenHandler
+	post /shorten (ShortenRequest) returns (ShortenResponse)
+
+	@handler RestoreHandler
+	get /:shortURL (RestoreRequest) returns (RestoreResponse)
+}
+
