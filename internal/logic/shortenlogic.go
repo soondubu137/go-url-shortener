@@ -33,7 +33,7 @@ func (l *ShortenLogic) Shorten(req *types.ShortenRequest) (resp *types.ShortenRe
 		return nil, ierrors.ErrInvalidURL
 	}
 
-	// check if the url is already shortened and present in the database
+	// check if the url has already been shortened and exists in the database
 	// only proceed if the following lookup returns ErrNotFound
 	res, err := l.svcCtx.URLMapModel.FindOneByMd5(l.ctx, utils.GenerateMD5(req.OriginalURL))
 	if err != model.ErrNotFound {
@@ -43,6 +43,22 @@ func (l *ShortenLogic) Shorten(req *types.ShortenRequest) (resp *types.ShortenRe
 			}, nil
 		} else {
 			logx.Errorw("failed to find url by md5", logx.LogField{Key: "error", Value: err.Error()})
+			return nil, err
+		}
+	}
+
+	// check if the url is itself a shortened url, we don't accept such urls
+	baseURL, err := utils.GetBaseURL(req.OriginalURL)
+	if err != nil {
+		logx.Errorw("failed to get base url", logx.LogField{Key: "error", Value: err.Error()})
+		return nil, err
+	}
+	_, err = l.svcCtx.URLMapModel.FindOneByShortUrl(l.ctx, baseURL)
+	if err != model.ErrNotFound {
+		if err == nil {
+			return nil, ierrors.ErrURLAlreadyShortened
+		} else {
+			logx.Errorw("failed to find url by short url", logx.LogField{Key: "error", Value: err.Error()})
 			return nil, err
 		}
 	}
