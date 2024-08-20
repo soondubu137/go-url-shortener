@@ -1,5 +1,11 @@
 package utils
 
+/**
+* This file contains all the utility functions related to network connections.
+* @Author: Yinfeng Lu
+* @Date: 2024-08-20
+ */
+
 import (
 	"net/http"
 	"time"

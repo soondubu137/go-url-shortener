@@ -1,5 +1,11 @@
 package utils
 
+/**
+* This file contains all the utility functions related to URLs.
+* @Author: Yinfeng Lu
+* @Date: 2024-08-20
+ */
+
 import (
 	ierrors "go-url-shortener/errors"
 	"net/url"

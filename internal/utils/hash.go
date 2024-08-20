@@ -1,5 +1,11 @@
 package utils
 
+/**
+* This file contains all the utility functions related to hashing.
+* @Author: Yinfeng Lu
+* @Date: 2024-08-20
+ */
+
 import (
 	"crypto/md5"
 	"encoding/hex"
