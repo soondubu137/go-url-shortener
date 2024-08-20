@@ -2,7 +2,7 @@
 package types
 
 type RestoreRequest struct {
-	ShortURL string `json:"short_url"`
+	ShortURL string `json:"short_url" validate:"required,url"`
 }
 
 type RestoreResponse struct {
@@ -10,7 +10,7 @@ type RestoreResponse struct {
 }
 
 type ShortenRequest struct {
-	OriginalURL string `json:"original_url"`
+	OriginalURL string `json:"original_url" validate:"required,url"`
 }
 
 type ShortenResponse struct {

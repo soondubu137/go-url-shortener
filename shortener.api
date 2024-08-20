@@ -1,5 +1,5 @@
 type ShortenRequest {
-	OriginalURL string `json:"original_url"`
+	OriginalURL string `json:"original_url" validate:"required,url"`
 }
 
 type ShortenResponse {
@@ -7,7 +7,7 @@ type ShortenResponse {
 }
 
 type RestoreRequest {
-	ShortURL string `json:"short_url"`
+	ShortURL string `json:"short_url" validate:"required,url"`
 }
 
 type RestoreResponse {
