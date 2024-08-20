@@ -29,7 +29,7 @@ func NewShortenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ShortenLo
 func (l *ShortenLogic) Shorten(req *types.ShortenRequest) (resp *types.ShortenResponse, err error) {
 	// test connection
 	// if the url is unreachable, there is no need to proceed
-	if !utils.TestConnection(req.OriginalURL) {
+	if !utils.CanConnect(req.OriginalURL) {
 		return nil, ierrors.ErrInvalidURL
 	}
 

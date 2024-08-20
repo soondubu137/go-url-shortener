@@ -22,12 +22,12 @@ var connectionTester = &http.Client{
 	Timeout: 2 * time.Second,
 }
 
-// TestConnection tests the connection to the given URL.
+// CanConnect tests the connection to the given URL.
 // If the given URL is invalid
 // (i.e. connection request times out after 2 seconds, or the status code is not 200),
 // it returns false. Otherwise, it returns true.
 // Note that redirecting URLs are not accepted.
-func TestConnection(url string) bool {
+func CanConnect(url string) bool {
 	resp, err := connectionTester.Get(url)
 	if err != nil {
 		logx.Errorw("connection test failed", logx.LogField{Key: "error", Value: err.Error()})
