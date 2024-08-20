@@ -3,6 +3,7 @@ package svc
 import (
 	"fmt"
 	"go-url-shortener/internal/config"
+	"go-url-shortener/internal/utils/idgenerator"
 	"go-url-shortener/model"
 
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
@@ -11,6 +12,7 @@ import (
 type ServiceContext struct {
 	Config      config.Config
 	URLMapModel model.UrlMapModel
+	IdGenerator idgenerator.IdGenerator
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -21,8 +23,11 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		c.URLMapDB.Port,
 		c.URLMapDB.DB,
 	))
+
 	return &ServiceContext{
 		Config:      c,
 		URLMapModel: model.NewUrlMapModel(conn),
+		// can be replaced with other IdGenerator implementations
+		IdGenerator: idgenerator.NewDefaultIdGenerator(c),
 	}
 }

@@ -28,6 +28,7 @@ type (
 		FindOneByStub(ctx context.Context, stub string) (*Sequence, error)
 		Update(ctx context.Context, data *Sequence) error
 		Delete(ctx context.Context, id int64) error
+        Replace(ctx context.Context, stub string) (int64, error)
 	}
 
 	defaultSequenceModel struct {
@@ -97,4 +98,17 @@ func (m *defaultSequenceModel) Update(ctx context.Context, newData *Sequence) er
 
 func (m *defaultSequenceModel) tableName() string {
 	return m.table
+}
+
+func (m *defaultSequenceModel) Replace(ctx context.Context, stub string) (int64, error) {
+	query := fmt.Sprintf("replace into %s (`stub`) values (?)", m.table)
+	result, err := m.conn.ExecCtx(ctx, query, stub)
+	if err != nil {
+		return 0, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }

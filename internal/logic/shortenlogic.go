@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"fmt"
 
 	ierrors "go-url-shortener/errors"
 	"go-url-shortener/internal/svc"
@@ -62,6 +63,14 @@ func (l *ShortenLogic) Shorten(req *types.ShortenRequest) (resp *types.ShortenRe
 			return nil, err
 		}
 	}
+
+	// generate a new id
+	id, err := l.svcCtx.IdGenerator.Generate(l.ctx, "dflt")
+	if err != nil {
+		logx.Errorw("failed to generate id", logx.LogField{Key: "error", Value: err.Error()})
+		return nil, err
+	}
+	fmt.Println(id)
 
 	return
 }
