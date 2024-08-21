@@ -12,9 +12,9 @@ func TestGetBaseURL(t *testing.T) {
 		want    string
 		wantErr bool
 	}{
-		{name: "Basic", args: args{u: "https://example.com/1a2b3c"}, want: "1a2b3c", wantErr: false},
-		{name: "BasicWithDepth", args: args{u: "https://example.com/1a2b3c/4d5e6f"}, want: "4d5e6f", wantErr: false},
-		{name: "BasicWithQuery", args: args{u: "https://example.com/1a2b3c?arg=val"}, want: "1a2b3c", wantErr: false},
+		{"Basic", args{u: "https://example.com/1a2b3c"}, "1a2b3c", false},
+		{"BasicWithDepth", args{u: "https://example.com/1a2b3c/4d5e6f"}, "4d5e6f", false},
+		{"BasicWithQuery", args{u: "https://example.com/1a2b3c?arg=val"}, "1a2b3c", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

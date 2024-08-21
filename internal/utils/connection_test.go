@@ -11,9 +11,9 @@ func TestCanConnect(t *testing.T) {
 		args args
 		want bool
 	}{
-		{name: "Google", args: args{url: "https://www.google.com"}, want: true},
-		{name: "Invalid", args: args{url: "https://invalid.google.com"}, want: false},
-		{name: "404", args: args{url: "https://github.com/SoonDubu923/does-not-exist"}, want: false},
+		{"Google", args{url: "https://www.google.com"}, true},
+		{"Invalid", args{url: "https://invalid.google.com"}, false},
+		{"404", args{url: "https://github.com/SoonDubu923/does-not-exist"}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

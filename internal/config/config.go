@@ -7,6 +7,8 @@ type Config struct {
 
 	// custom config
 
+	CypherKey string
+
 	// URLMapDB is the config for the url_map table
 	URLMapDB struct {
 		Host     string

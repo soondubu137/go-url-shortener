@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"fmt"
 
 	ierrors "go-url-shortener/errors"
 	"go-url-shortener/internal/svc"
@@ -36,7 +35,8 @@ func (l *ShortenLogic) Shorten(req *types.ShortenRequest) (resp *types.ShortenRe
 
 	// check if the url has already been shortened and exists in the database
 	// only proceed if the following lookup returns ErrNotFound
-	res, err := l.svcCtx.URLMapModel.FindOneByMd5(l.ctx, utils.GenerateMD5(req.OriginalURL))
+	md5 := utils.GenerateMD5(req.OriginalURL)
+	res, err := l.svcCtx.URLMapModel.FindOneByMd5(l.ctx, md5)
 	if err != model.ErrNotFound {
 		if err == nil {
 			return &types.ShortenResponse{
@@ -70,7 +70,21 @@ func (l *ShortenLogic) Shorten(req *types.ShortenRequest) (resp *types.ShortenRe
 		logx.Errorw("failed to generate id", logx.LogField{Key: "error", Value: err.Error()})
 		return nil, err
 	}
-	fmt.Println(id)
+	shortURL := utils.EncodeBase62(id, l.svcCtx.Config.CypherKey)
 
-	return
+	// insert the pair of original URL and shortened URL into the database
+	_, err = l.svcCtx.URLMapModel.Insert(l.ctx, &model.UrlMap{
+		Md5:         md5,
+		OriginalUrl: req.OriginalURL,
+		ShortUrl:    shortURL,
+	})
+	if err != nil {
+		logx.Errorw("failed to insert url map", logx.LogField{Key: "error", Value: err.Error()})
+		return nil, err
+	}
+
+	// return the shortened URL
+	return &types.ShortenResponse{
+		ShortURL: shortURL,
+	}, nil
 }
