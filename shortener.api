@@ -7,7 +7,7 @@ type ShortenResponse {
 }
 
 type RestoreRequest {
-	ShortURL string `json:"short_url" validate:"required,url"`
+	ShortURL string `path:"short_url" validate:"required"`
 }
 
 type RestoreResponse {
@@ -19,6 +19,6 @@ service shortener-api {
 	post /shorten (ShortenRequest) returns (ShortenResponse)
 
 	@handler RestoreHandler
-	get /:shortURL (RestoreRequest) returns (RestoreResponse)
+	get /:short_url (RestoreRequest) returns (RestoreResponse)
 }
 

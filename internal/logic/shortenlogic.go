@@ -75,6 +75,7 @@ func (l *ShortenLogic) Shorten(req *types.ShortenRequest) (resp *types.ShortenRe
 	// insert the pair of original URL and shortened URL into the database
 	_, err = l.svcCtx.URLMapModel.Insert(l.ctx, &model.UrlMap{
 		Md5:         md5,
+		CreateBy:    "root",
 		OriginalUrl: req.OriginalURL,
 		ShortUrl:    shortURL,
 	})

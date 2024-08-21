@@ -6,13 +6,13 @@ CypherKey: "47fs9FMYgDJowK86xdyvtnXE2HeOr1NBk3mzcV5bpIaGqiSA0CPjURTWLQuhlZ"
 URLMapDB:
   Host: localhost
   Port: 33060
-  User: admin
-  Password: admin
+  User: root
+  Password: root
   DB: url_shortener
 
 SequenceDB:
   Host: localhost
   Port: 33060
-  User: admin
-  Password: admin
+  User: root
+  Password: root
   DB: url_shortener

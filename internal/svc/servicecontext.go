@@ -16,7 +16,7 @@ type ServiceContext struct {
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-	conn := sqlx.NewMysql(fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",
+	conn := sqlx.NewMysql(fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True",
 		c.URLMapDB.User,
 		c.URLMapDB.Password,
 		c.URLMapDB.Host,

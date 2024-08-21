@@ -24,7 +24,15 @@ func NewRestoreLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RestoreLo
 }
 
 func (l *RestoreLogic) Restore(req *types.RestoreRequest) (resp *types.RestoreResponse, err error) {
-	// todo: add your logic here and delete this line
+	shortURL := req.ShortURL
+	// query for the original url from the database
+	res, err := l.svcCtx.URLMapModel.FindOneByShortUrl(l.ctx, shortURL)
+	if err != nil {
+		logx.Errorw("failed to find url by short url", logx.LogField{Key: "error", Value: err.Error()})
+		return nil, err
+	}
 
-	return
+	return &types.RestoreResponse{
+		OriginalURL: res.OriginalUrl,
+	}, nil
 }
