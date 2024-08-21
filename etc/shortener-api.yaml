@@ -3,6 +3,9 @@ Host: 0.0.0.0
 Port: 8888
 CypherKey: "47fs9FMYgDJowK86xdyvtnXE2HeOr1NBk3mzcV5bpIaGqiSA0CPjURTWLQuhlZ"
 
+CacheRedis:
+  - Host: localhost:6379
+
 URLMapDB:
   Host: localhost
   Port: 33060

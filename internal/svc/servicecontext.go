@@ -26,7 +26,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 
 	return &ServiceContext{
 		Config:      c,
-		URLMapModel: model.NewUrlMapModel(conn),
+		URLMapModel: model.NewUrlMapModel(conn, c.CacheRedis),
 		// can be replaced with other IdGenerator implementations
 		IdGenerator: idgenerator.NewDefaultIdGenerator(c),
 	}

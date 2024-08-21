@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/zeromicro/go-zero/core/stores/builder"
+	"github.com/zeromicro/go-zero/core/stores/cache"
+	"github.com/zeromicro/go-zero/core/stores/sqlc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/core/stringx"
 )
@@ -19,6 +21,10 @@ var (
 	urlMapRows                = strings.Join(urlMapFieldNames, ",")
 	urlMapRowsExpectAutoSet   = strings.Join(stringx.Remove(urlMapFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
 	urlMapRowsWithPlaceHolder = strings.Join(stringx.Remove(urlMapFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
+
+	cacheUrlMapIdPrefix       = "cache:urlMap:id:"
+	cacheUrlMapMd5Prefix      = "cache:urlMap:md5:"
+	cacheUrlMapShortUrlPrefix = "cache:urlMap:shortUrl:"
 )
 
 type (
@@ -32,7 +38,7 @@ type (
 	}
 
 	defaultUrlMapModel struct {
-		conn  sqlx.SqlConn
+		sqlc.CachedConn
 		table string
 	}
 
@@ -47,27 +53,40 @@ type (
 	}
 )
 
-func newUrlMapModel(conn sqlx.SqlConn) *defaultUrlMapModel {
+func newUrlMapModel(conn sqlx.SqlConn, c cache.CacheConf, opts ...cache.Option) *defaultUrlMapModel {
 	return &defaultUrlMapModel{
-		conn:  conn,
-		table: "`url_map`",
+		CachedConn: sqlc.NewConn(conn, c, opts...),
+		table:      "`url_map`",
 	}
 }
 
 func (m *defaultUrlMapModel) Delete(ctx context.Context, id int64) error {
-	query := fmt.Sprintf("delete from %s where `id` = ?", m.table)
-	_, err := m.conn.ExecCtx(ctx, query, id)
+	data, err := m.FindOne(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	urlMapIdKey := fmt.Sprintf("%s%v", cacheUrlMapIdPrefix, id)
+	urlMapMd5Key := fmt.Sprintf("%s%v", cacheUrlMapMd5Prefix, data.Md5)
+	urlMapShortUrlKey := fmt.Sprintf("%s%v", cacheUrlMapShortUrlPrefix, data.ShortUrl)
+	_, err = m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
+		query := fmt.Sprintf("delete from %s where `id` = ?", m.table)
+		return conn.ExecCtx(ctx, query, id)
+	}, urlMapIdKey, urlMapMd5Key, urlMapShortUrlKey)
 	return err
 }
 
 func (m *defaultUrlMapModel) FindOne(ctx context.Context, id int64) (*UrlMap, error) {
-	query := fmt.Sprintf("select %s from %s where `id` = ? limit 1", urlMapRows, m.table)
+	urlMapIdKey := fmt.Sprintf("%s%v", cacheUrlMapIdPrefix, id)
 	var resp UrlMap
-	err := m.conn.QueryRowCtx(ctx, &resp, query, id)
+	err := m.QueryRowCtx(ctx, &resp, urlMapIdKey, func(ctx context.Context, conn sqlx.SqlConn, v any) error {
+		query := fmt.Sprintf("select %s from %s where `id` = ? limit 1", urlMapRows, m.table)
+		return conn.QueryRowCtx(ctx, v, query, id)
+	})
 	switch err {
 	case nil:
 		return &resp, nil
-	case sqlx.ErrNotFound:
+	case sqlc.ErrNotFound:
 		return nil, ErrNotFound
 	default:
 		return nil, err
@@ -75,13 +94,19 @@ func (m *defaultUrlMapModel) FindOne(ctx context.Context, id int64) (*UrlMap, er
 }
 
 func (m *defaultUrlMapModel) FindOneByMd5(ctx context.Context, md5 string) (*UrlMap, error) {
+	urlMapMd5Key := fmt.Sprintf("%s%v", cacheUrlMapMd5Prefix, md5)
 	var resp UrlMap
-	query := fmt.Sprintf("select %s from %s where `md5` = ? limit 1", urlMapRows, m.table)
-	err := m.conn.QueryRowCtx(ctx, &resp, query, md5)
+	err := m.QueryRowIndexCtx(ctx, &resp, urlMapMd5Key, m.formatPrimary, func(ctx context.Context, conn sqlx.SqlConn, v any) (i any, e error) {
+		query := fmt.Sprintf("select %s from %s where `md5` = ? limit 1", urlMapRows, m.table)
+		if err := conn.QueryRowCtx(ctx, &resp, query, md5); err != nil {
+			return nil, err
+		}
+		return resp.Id, nil
+	}, m.queryPrimary)
 	switch err {
 	case nil:
 		return &resp, nil
-	case sqlx.ErrNotFound:
+	case sqlc.ErrNotFound:
 		return nil, ErrNotFound
 	default:
 		return nil, err
@@ -89,13 +114,19 @@ func (m *defaultUrlMapModel) FindOneByMd5(ctx context.Context, md5 string) (*Url
 }
 
 func (m *defaultUrlMapModel) FindOneByShortUrl(ctx context.Context, shortUrl string) (*UrlMap, error) {
+	urlMapShortUrlKey := fmt.Sprintf("%s%v", cacheUrlMapShortUrlPrefix, shortUrl)
 	var resp UrlMap
-	query := fmt.Sprintf("select %s from %s where `short_url` = ? limit 1", urlMapRows, m.table)
-	err := m.conn.QueryRowCtx(ctx, &resp, query, shortUrl)
+	err := m.QueryRowIndexCtx(ctx, &resp, urlMapShortUrlKey, m.formatPrimary, func(ctx context.Context, conn sqlx.SqlConn, v any) (i any, e error) {
+		query := fmt.Sprintf("select %s from %s where `short_url` = ? limit 1", urlMapRows, m.table)
+		if err := conn.QueryRowCtx(ctx, &resp, query, shortUrl); err != nil {
+			return nil, err
+		}
+		return resp.Id, nil
+	}, m.queryPrimary)
 	switch err {
 	case nil:
 		return &resp, nil
-	case sqlx.ErrNotFound:
+	case sqlc.ErrNotFound:
 		return nil, ErrNotFound
 	default:
 		return nil, err
@@ -103,15 +134,39 @@ func (m *defaultUrlMapModel) FindOneByShortUrl(ctx context.Context, shortUrl str
 }
 
 func (m *defaultUrlMapModel) Insert(ctx context.Context, data *UrlMap) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?)", m.table, urlMapRowsExpectAutoSet)
-	ret, err := m.conn.ExecCtx(ctx, query, data.CreateBy, data.IsDeleted, data.OriginalUrl, data.ShortUrl, data.Md5)
+	urlMapIdKey := fmt.Sprintf("%s%v", cacheUrlMapIdPrefix, data.Id)
+	urlMapMd5Key := fmt.Sprintf("%s%v", cacheUrlMapMd5Prefix, data.Md5)
+	urlMapShortUrlKey := fmt.Sprintf("%s%v", cacheUrlMapShortUrlPrefix, data.ShortUrl)
+	ret, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
+		query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?)", m.table, urlMapRowsExpectAutoSet)
+		return conn.ExecCtx(ctx, query, data.CreateBy, data.IsDeleted, data.OriginalUrl, data.ShortUrl, data.Md5)
+	}, urlMapIdKey, urlMapMd5Key, urlMapShortUrlKey)
 	return ret, err
 }
 
 func (m *defaultUrlMapModel) Update(ctx context.Context, newData *UrlMap) error {
-	query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, urlMapRowsWithPlaceHolder)
-	_, err := m.conn.ExecCtx(ctx, query, newData.CreateBy, newData.IsDeleted, newData.OriginalUrl, newData.ShortUrl, newData.Md5, newData.Id)
+	data, err := m.FindOne(ctx, newData.Id)
+	if err != nil {
+		return err
+	}
+
+	urlMapIdKey := fmt.Sprintf("%s%v", cacheUrlMapIdPrefix, data.Id)
+	urlMapMd5Key := fmt.Sprintf("%s%v", cacheUrlMapMd5Prefix, data.Md5)
+	urlMapShortUrlKey := fmt.Sprintf("%s%v", cacheUrlMapShortUrlPrefix, data.ShortUrl)
+	_, err = m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
+		query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, urlMapRowsWithPlaceHolder)
+		return conn.ExecCtx(ctx, query, newData.CreateBy, newData.IsDeleted, newData.OriginalUrl, newData.ShortUrl, newData.Md5, newData.Id)
+	}, urlMapIdKey, urlMapMd5Key, urlMapShortUrlKey)
 	return err
+}
+
+func (m *defaultUrlMapModel) formatPrimary(primary any) string {
+	return fmt.Sprintf("%s%v", cacheUrlMapIdPrefix, primary)
+}
+
+func (m *defaultUrlMapModel) queryPrimary(ctx context.Context, conn sqlx.SqlConn, v, primary any) error {
+	query := fmt.Sprintf("select %s from %s where `id` = ? limit 1", urlMapRows, m.table)
+	return conn.QueryRowCtx(ctx, v, query, primary)
 }
 
 func (m *defaultUrlMapModel) tableName() string {
