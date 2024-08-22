@@ -84,6 +84,12 @@ func (l *ShortenLogic) Shorten(req *types.ShortenRequest) (resp *types.ShortenRe
 		return nil, err
 	}
 
+	// insert the shortened URL into the bloom filter
+	if err = l.svcCtx.Filter.Add([]byte(shortURL)); err != nil {
+		logx.Errorw("failed to add url to bloom filter", logx.LogField{Key: "error", Value: err.Error()})
+		return nil, err
+	}
+
 	// return the shortened URL
 	return &types.ShortenResponse{
 		ShortURL: shortURL,
