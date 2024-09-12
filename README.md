@@ -16,7 +16,7 @@ This not only looks horrible, but it can also lead to problems such as exceeding
 https://ssp.com/iLw26qfeV
 ```
 
-This project demonstrates the implementation of a basic version of such a URL shortener.
+This project implements a basic version of such a URL shortener.
 
 ## Project Architecture
 
