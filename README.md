@@ -69,9 +69,8 @@ The project contains the following essential components:
 
   - Redirection is achieved by returning status code 302.
 
-    > [!NOTE]
-    >
-    > We use 302 instead of 301 to force every redirection to go through our redirection server (by preventing browser cache). This can make the analytics service (which does *not* exist in this project) more accurate.
+> [!NOTE]
+> We use 302 instead of 301 to force every redirection to go through our redirection server (by preventing browser cache). This can make the analytics service (which does *not* exist in this project) more accurate.
 
   - Performance improvement
 
