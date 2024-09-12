@@ -76,11 +76,11 @@ The project contains the following essential components:
 
     This is achieved by adding a cache layer between the redirection server and the URL mapping store. Since a URL shortener service is a typical more-read-less-write service, it is essential to separate read from write to significantly improve performance.
 
-  - Cache Penetration
+  - Cache penetration
 
     To mitigate cache penetration, we use a bloom filter.
 
-  - Cache Breakdown
+  - Cache breakdown
 
   - To mitigate cache breakdown, we use singleflight (already integrated in go-zero).
 
