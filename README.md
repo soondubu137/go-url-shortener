@@ -103,7 +103,7 @@ Here I list some potential extensions to this project and my plan about implemen
 | Extension              | Explanation                                                  | Planned | Impl'ed |
 | ---------------------- | ------------------------------------------------------------ | ------- | ------- |
 | Authentication         | Users must authenticate themselves when they try to invoke the URL shortener service (e.g. with JWT). | N       |         |
-| Special word Avoidance | Impolite or reserved words should be avoided in the shortened URL. | Y       | N       |
+| Special Word Avoidance | Impolite or reserved words should be avoided in the shortened URL. | Y       | N       |
 | Customization          | Users can have the ability to customize the shortened URL.   | Y       | N       |
 | Expiration             | A shortened URL can be assigned (either by default or by the creator) an expiration date. | Y       | N       |
 
