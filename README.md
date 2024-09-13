@@ -1,6 +1,6 @@
 # go-url-shortener
 
-This *educational* project demonstrates the implementation of a basic URL shortener service in [Go](https://go.dev/).
+This _educational_ project demonstrates the implementation of a basic URL shortener service in [Go](https://go.dev/).
 
 ## Introduction
 
@@ -19,6 +19,10 @@ https://ssp.com/iLw26qfeV
 This project implements a basic version of such a URL shortener.
 
 ## Project Architecture
+
+An illustration of the architectural design of this project:
+
+![go-url-shortener-structure](https://github.com/soondubu137/go-url-shortener/blob/main/url-shortener-structure.png)
 
 The project contains the following essential components:
 
@@ -70,19 +74,19 @@ The project contains the following essential components:
   - Redirection is achieved by returning status code 302.
 
 > [!NOTE]
-> We use 302 instead of 301 to force every redirection to go through our redirection server (by preventing browser cache). This can make the analytics service (which does *not* exist in this project) more accurate.
+> We use 302 instead of 301 to force every redirection to go through our redirection server (by preventing browser cache). This can make the analytics service (which does _not_ exist in this project) more accurate.
 
-  - Performance improvement
+- Performance improvement
 
-    This is achieved by adding a cache layer between the redirection server and the URL mapping store. Since a URL shortener service is a typical more-read-less-write service, it is essential to separate read from write to significantly improve performance.
+  This is achieved by adding a cache layer between the redirection server and the URL mapping store. Since a URL shortener service is a typical more-read-less-write service, it is essential to separate read from write to significantly improve performance.
 
-  - Cache penetration
+- Cache penetration
 
-    To mitigate cache penetration, we use a bloom filter.
+  To mitigate cache penetration, we use a bloom filter.
 
-  - Cache breakdown
+- Cache breakdown
 
-  - To mitigate cache breakdown, we use singleflight (already integrated in go-zero).
+- To mitigate cache breakdown, we use singleflight (already integrated in go-zero).
 
 ## Learning Outcomes
 
@@ -100,12 +104,12 @@ Through this project, I
 
 Here I list some potential extensions to this project and my plan about implementing them.
 
-| Extension              | Explanation                                                  | Planned | Impl'ed |
-| ---------------------- | ------------------------------------------------------------ | ------- | ------- |
+| Extension              | Explanation                                                                                           | Planned | Impl'ed |
+| ---------------------- | ----------------------------------------------------------------------------------------------------- | ------- | ------- |
 | Authentication         | Users must authenticate themselves when they try to invoke the URL shortener service (e.g. with JWT). | N       |         |
-| Special Word Avoidance | Impolite or reserved words should be avoided in the shortened URL. | Y       | N       |
-| Customization          | Users can have the ability to customize the shortened URL.   | Y       | N       |
-| Expiration             | A shortened URL can be assigned (either by default or by the creator) an expiration date. | Y       | N       |
+| Special Word Avoidance | Impolite or reserved words should be avoided in the shortened URL.                                    | Y       | N       |
+| Customization          | Users can have the ability to customize the shortened URL.                                            | Y       | N       |
+| Expiration             | A shortened URL can be assigned (either by default or by the creator) an expiration date.             | Y       | N       |
 
 ## References
 
@@ -114,4 +118,4 @@ Here I list some potential extensions to this project and my plan about implemen
 
 3. https://www.pixelstech.net/article/1586522853-What-is-cache-penetration-cache-breakdown-and-cache-avalanche
 
-4. S. Chiang, *Hacking the System Design Interview: Real Big Tech Interview Questions and In-depth Solutions*. Studious Press LLC, 2022.
+4. S. Chiang, _Hacking the System Design Interview: Real Big Tech Interview Questions and In-depth Solutions_. Studious Press LLC, 2022.
